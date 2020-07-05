@@ -60,8 +60,7 @@ func main() {
 
 	device := homie.NewDevice("sys-info", &homie.Config{
 		Mqtt: homie.MqttConfig{
-			Host:     "localhost",
-			Port:     1883,
+			URL:     "tcp://localhost:1883/",
 			Username: "user",
 			Password: "password",
 		},

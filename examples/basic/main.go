@@ -30,8 +30,7 @@ func periodicRandomIntPublisher(tickerPriod string) (homie.PeriodicPublisher, er
 func main() {
 	device := homie.NewDevice("test1", &homie.Config{
 		Mqtt: homie.MqttConfig{
-			Host:     "localhost",
-			Port:     1883,
+			URL:      "tcp://localhost:1883/",
 			Username: "user",
 			Password: "password",
 		},

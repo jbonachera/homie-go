@@ -47,8 +47,7 @@ func (m *mqttAdapterMock) Subscribe(topic string, qos byte, callback mqtt.Messag
 func makeTestDevice(name string) Device {
 	return NewDevice(name, &Config{
 		Mqtt: MqttConfig{
-			Host:     "localhost",
-			Port:     1883,
+			URL:      "tcp://localhost:1883/",
 			Username: "user",
 			Password: "password",
 		},

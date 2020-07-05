@@ -1,6 +1,7 @@
 package homie
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
@@ -123,18 +124,21 @@ func (d *device) Run(block bool) {
 }
 
 func (d *device) createMqttOptions() *mqtt.ClientOptions {
-	broker, err := url.Parse(fmt.Sprintf("tcp://%s:%d", d.config.Mqtt.Host, d.config.Mqtt.Port))
+	brokerURL, err := url.Parse(d.config.Mqtt.URL)
 	if err != nil {
-		log.Panic(err)
+		panic(err)
 	}
-
+	tlsConfig := &tls.Config{
+		ServerName: brokerURL.Hostname(),
+	}
 	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s", broker.Host))
+	opts.AddBroker(d.config.Mqtt.URL)
 	opts.SetUsername(d.config.Mqtt.Username)
 	opts.SetPassword(d.config.Mqtt.Password)
 	opts.SetClientID(d.name)
 	opts.SetBinaryWill(d.Topic("$state"), []byte("lost"), 1, true)
 	opts.SetAutoReconnect(true)
+	opts.SetTLSConfig(tlsConfig)
 	opts.SetOnConnectHandler(func(c mqtt.Client) {
 		// TODO: refactor this, currently it creates multiple instances of delegates on re-connect
 		d.OnConnect(&mqttClientDelegate{

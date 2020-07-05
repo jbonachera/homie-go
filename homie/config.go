@@ -2,8 +2,7 @@ package homie
 
 // MqttConfig broker config
 type MqttConfig struct {
-	Host     string
-	Port     int
+	URL      string
 	Username string
 	Password string
 }

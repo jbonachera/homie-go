@@ -20,6 +20,7 @@ type Device interface {
 	NewNode(name string, nodeType string) Node
 	AddNode(node Node) Node
 	GetNode(name string) Node
+	Connect() error
 	Run(block bool)
 	Config() *Config
 	Client() MqttAdapter
@@ -114,10 +115,13 @@ func (d *device) AddNode(node Node) Node {
 	d.nodes[node.Name()] = node
 	return node
 }
-
-func (d *device) Run(block bool) {
+func (d *device) Connect() error {
 	options := d.createMqttOptions()
-	d.connect(options)
+	return d.connect(options)
+
+}
+func (d *device) Run(block bool) {
+	d.Connect()
 
 	if block {
 		select {} // block forever
@@ -169,15 +173,15 @@ func (d *device) OnConnect(client MqttAdapter) {
 func (d *device) OnConnectionLost(client MqttAdapter, err error) {
 }
 
-func (d *device) connect(options *mqtt.ClientOptions) mqtt.Client {
+func (d *device) connect(options *mqtt.ClientOptions) error {
 	client := mqtt.NewClient(options)
 	token := client.Connect() // start connecting to broker, initialisation is done in onConnectHandler
 	for !token.WaitTimeout(3 * time.Second) {
 	}
 	if err := token.Error(); err != nil {
-		log.Panic(err)
+		return err
 	}
-	return client
+	return nil
 }
 
 func (d *device) Topic(part string) string {

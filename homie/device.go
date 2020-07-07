@@ -24,6 +24,7 @@ type Device interface {
 	Config() *Config
 	Client() MqttAdapter
 	OnConnect(client MqttAdapter)
+	OnConnectionLost(client MqttAdapter, err error)
 
 	// Topic returns full topic for a part, prefixed with baseTopic and deviceName
 	Topic(part string) string
@@ -139,11 +140,22 @@ func (d *device) createMqttOptions() *mqtt.ClientOptions {
 	opts.SetBinaryWill(d.Topic("$state"), []byte("lost"), 1, true)
 	opts.SetAutoReconnect(true)
 	opts.SetTLSConfig(tlsConfig)
+	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
+		if d.config != nil && d.config.Mqtt.OnConnectionLost != nil {
+			d.config.Mqtt.OnConnectionLost(err)
+		}
+		d.OnConnectionLost(&mqttClientDelegate{
+			client: c,
+		}, err)
+	})
 	opts.SetOnConnectHandler(func(c mqtt.Client) {
 		// TODO: refactor this, currently it creates multiple instances of delegates on re-connect
 		d.OnConnect(&mqttClientDelegate{
 			client: c,
 		})
+		if d.config != nil && d.config.Mqtt.OnConnect != nil {
+			d.config.Mqtt.OnConnect()
+		}
 	})
 	return opts
 }
@@ -153,6 +165,8 @@ func (d *device) OnConnect(client MqttAdapter) {
 	d.stats.connectTime = time.Now()
 	d.initNodes()
 	d.initDevice()
+}
+func (d *device) OnConnectionLost(client MqttAdapter, err error) {
 }
 
 func (d *device) connect(options *mqtt.ClientOptions) mqtt.Client {

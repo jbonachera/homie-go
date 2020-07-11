@@ -7,6 +7,7 @@ type MqttConfig struct {
 	Password         string
 	OnConnect        func()
 	OnConnectionLost func(err error)
+	OnBroadcast      func(level string, message []byte)
 }
 
 // Config homie config

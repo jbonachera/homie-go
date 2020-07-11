@@ -235,6 +235,11 @@ func (d *device) initDevice() {
 		d.publisher(d)
 	}
 	d.PublishStats()
+	d.client.Subscribe(fmt.Sprintf("%s$broadcast/+", d.config.BaseTopic), 1, func(_ mqtt.Client, message mqtt.Message) {
+		if d.config.Mqtt.OnBroadcast != nil {
+			d.config.Mqtt.OnBroadcast(strings.TrimPrefix(message.Topic(), fmt.Sprintf("%s$broadcast/", d.config.BaseTopic)), message.Payload())
+		}
+	})
 }
 
 func (d *device) initNodes() {

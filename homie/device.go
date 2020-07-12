@@ -34,6 +34,8 @@ type Device interface {
 	SetDevicePublisher(publisher DevicePublisher) Device
 
 	PublishStats()
+
+	Disconnect() error
 }
 
 // DeviceStats stats about device like startup, connect time, etc
@@ -249,4 +251,10 @@ func (d *device) initNodes() {
 			n.NodePublisher()(n) // invoke publishers
 		}
 	}
+}
+
+func (d *device) Disconnect() error {
+	d.SendMessage("$state", "disconnected")
+	d.client.Disconnect(500)
+	return nil
 }

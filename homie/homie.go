@@ -26,6 +26,8 @@ type MqttAdapter interface {
 	// Subscribe starts a new subscription. Provide a MessageHandler to be executed when
 	// a message is published on the topic provided, or nil for the default handler
 	Subscribe(topic string, qos byte, callback mqtt.MessageHandler) mqtt.Token
+
+	Disconnect(quiesce uint)
 }
 
 type mqttClientDelegate struct {
@@ -42,4 +44,7 @@ func (a *mqttClientDelegate) Publish(topic string, qos byte, retained bool, payl
 
 func (a *mqttClientDelegate) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) mqtt.Token {
 	return a.client.Subscribe(topic, qos, callback)
+}
+func (a *mqttClientDelegate) Disconnect(quiesce uint) {
+	a.client.Disconnect(quiesce)
 }

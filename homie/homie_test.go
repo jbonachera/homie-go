@@ -30,6 +30,8 @@ type mqttAdapterMock struct {
 	mock.Mock
 }
 
+func (m *mqttAdapterMock) Disconnect(uint) {
+}
 func (m *mqttAdapterMock) IsConnected() bool {
 	args := m.Called()
 	return args.Get(0).(bool)

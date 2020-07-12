@@ -146,7 +146,7 @@ func (d *device) createMqttOptions() *mqtt.ClientOptions {
 	opts.SetTLSConfig(tlsConfig)
 	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
 		if d.config != nil && d.config.Mqtt.OnConnectionLost != nil {
-			d.config.Mqtt.OnConnectionLost(err)
+			d.config.Mqtt.OnConnectionLost(d, err)
 		}
 		d.OnConnectionLost(&mqttClientDelegate{
 			client: c,
@@ -158,7 +158,7 @@ func (d *device) createMqttOptions() *mqtt.ClientOptions {
 			client: c,
 		})
 		if d.config != nil && d.config.Mqtt.OnConnect != nil {
-			d.config.Mqtt.OnConnect()
+			d.config.Mqtt.OnConnect(d)
 		}
 	})
 	return opts
@@ -237,7 +237,7 @@ func (d *device) initDevice() {
 	d.PublishStats()
 	d.client.Subscribe(fmt.Sprintf("%s$broadcast/+", d.config.BaseTopic), 1, func(_ mqtt.Client, message mqtt.Message) {
 		if d.config.Mqtt.OnBroadcast != nil {
-			d.config.Mqtt.OnBroadcast(strings.TrimPrefix(message.Topic(), fmt.Sprintf("%s$broadcast/", d.config.BaseTopic)), message.Payload())
+			d.config.Mqtt.OnBroadcast(d, strings.TrimPrefix(message.Topic(), fmt.Sprintf("%s$broadcast/", d.config.BaseTopic)), message.Payload())
 		}
 	})
 }

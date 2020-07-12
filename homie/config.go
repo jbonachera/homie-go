@@ -5,9 +5,9 @@ type MqttConfig struct {
 	URL              string
 	Username         string
 	Password         string
-	OnConnect        func()
-	OnConnectionLost func(err error)
-	OnBroadcast      func(level string, message []byte)
+	OnConnect        func(device Device)
+	OnConnectionLost func(device Device, err error)
+	OnBroadcast      func(device Device, level string, message []byte)
 }
 
 // Config homie config
